@@ -43,6 +43,11 @@ class FileLocator extends BaseFileLocator
     protected $lastTheme;
 
     /**
+     * @var string
+     */
+    protected $lastAppId;
+
+    /**
      * Constructor.
      *
      * @param KernelInterface $kernel       A KernelInterface instance
@@ -72,7 +77,7 @@ class FileLocator extends BaseFileLocator
             ),
         );
 
-        $this->pathPatterns = array_merge_recursive($defaultPathPatterns, array_filter($pathPatterns));
+        $this->pathPatterns = !$this->activeTheme->getAppId() ? $defaultPathPatterns : $this->pathPatterns = $pathPatterns;
 
         $this->setCurrentTheme($this->activeTheme->getName());
     }
@@ -93,6 +98,16 @@ class FileLocator extends BaseFileLocator
         $paths[] = $this->path;
 
         $this->paths = $paths;
+    }
+
+    /**
+     * Set the active appId.
+     *
+     * @param string $appId
+     */
+    public function setCurrentAppId($appId)
+    {
+        $this->lastAppId = $appId;
     }
 
     /**
@@ -119,8 +134,12 @@ class FileLocator extends BaseFileLocator
     {
         // update the paths if the theme changed since the last lookup
         $theme = $this->activeTheme->getName();
+        $appId = $this->activeTheme->getAppId();
         if ($this->lastTheme !== $theme) {
             $this->setCurrentTheme($theme);
+        }
+        if ($this->lastAppId !== $appId) {
+            $this->setCurrentAppId($appId);
         }
 
         if ('@' === $name[0]) {
@@ -171,6 +190,7 @@ class FileLocator extends BaseFileLocator
             '%dir%'           => $dir,
             '%override_path%' => substr($path, strlen('Resources/')),
             '%current_theme%' => $this->lastTheme,
+            '%app_id%'        => $this->lastAppId,
             '%template%'      => substr($path, strlen('Resources/views/')),
         );
 
@@ -234,6 +254,7 @@ class FileLocator extends BaseFileLocator
         $parameters = array(
             '%app_path%'      => $this->path,
             '%current_theme%' => $this->lastTheme,
+            '%app_id%'        => $this->lastAppId,
             '%template%'      => substr($name, strlen('views/')),
         );
 

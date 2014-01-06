@@ -35,6 +35,7 @@
         <service id="liip_theme.active_theme" class="%liip_theme.active_theme.class%">
             <argument>%liip_theme.active_theme%</argument>
             <argument>%liip_theme.themes%</argument>
+            <argument type="service" id="service_container" />
         </service>
 
     </services>

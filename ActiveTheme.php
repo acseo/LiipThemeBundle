@@ -30,17 +30,21 @@ class ActiveTheme
      */
     private $themes;
 
+    private $container;
+
     /**
      * @param string $name
      * @param array $themes
      */
-    public function __construct($name, array $themes = array())
+    public function __construct($name, array $themes = array(), \Symfony\Component\DependencyInjection\ContainerInterface $container)
     {
         $this->setThemes($themes);
 
         if ($name) {
             $this->setName($name);
         }
+
+        $this->container = $container;
     }
 
     public function getThemes()
@@ -56,6 +60,19 @@ class ActiveTheme
     public function getName()
     {
         return $this->name;
+    }
+
+    public function getAppId()
+    {
+        if ($this->container->isScopeActive('request')) {
+            foreach ($this->container->getParameter('liip_theme.authorized_controllers') as $authorizedController) {
+                if (strstr($this->container->get('request')->get('_controller'), $authorizedController)) {
+                    return $this->container->get('request')->get('id');
+                }
+            }
+        }
+
+        return false;
     }
 
     public function setName($name)
